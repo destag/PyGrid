@@ -1,11 +1,11 @@
-from anytree import Node, RenderTree
+from anytree import Node, RenderTree, Walker
 
 
 class Grid:
     def __init__(self, power):
         self.transformer_power = power
         self.nodes = [GridNode("[00]", 0, power, None)]
-        self.root = self.nodes[0].node
+        self.root = self.nodes[0]
         self.num_nodes = 0
 
     def add_node(self, length, power, parent_id):
@@ -14,14 +14,20 @@ class Grid:
             name = "[" + str(self.num_nodes) + "]"
         else:
             name = "[0" + str(self.num_nodes) + "]"
-        self.nodes.append(GridNode(name, length, power, self.nodes[parent_id].node))
+        self.nodes.append(GridNode(name, length, power, self.nodes[parent_id]))
 
 
-class GridNode:
+class GridNode(Node):
     def __init__(self, name, length, power, parent):
-        self.node = Node(name, parent=parent)
+        super().__init__(name, parent)
         self.length = length
         self.power = power
+
+    def total_length(self):
+        if self.parent.name == "[00]" or self.name == "[00]":
+            return self.length
+        else:
+            return self.length + self.parent.total_length()
 
 
 def get_kj(owners, is_city):
@@ -84,4 +90,13 @@ while True:
     if choice[0] == "exit":
         break
     elif choice[0] == "add":
-        grid.add_node(choice[2], choice[3], int(choice[1]))
+        grid.add_node(int(choice[2]), int(choice[3]), int(choice[1]))
+
+grid_len = 0
+for node in grid.nodes:
+    if node.is_leaf:
+        print(node.total_length())
+        if node.total_length() > grid_len:
+            grid_len = node.total_length()
+
+print(grid_len)
