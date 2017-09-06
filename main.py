@@ -1,4 +1,4 @@
-from anytree import Node, RenderTree, Walker
+from anytree import Node, RenderTree
 
 
 class Grid:
@@ -16,6 +16,14 @@ class Grid:
             name = "[0" + str(self.num_nodes) + "]"
         self.nodes.append(GridNode(name, length, power, self.nodes[parent_id]))
 
+    def __len__(self):
+        max_len = 0
+        for n in self.nodes:
+            if n.is_leaf:
+                if len(n) > max_len:
+                    max_len = len(n)
+        return max_len
+
 
 class GridNode(Node):
     def __init__(self, name, length, power, parent):
@@ -23,11 +31,11 @@ class GridNode(Node):
         self.length = length
         self.power = power
 
-    def total_length(self):
+    def __len__(self):
         if self.parent.name == "[00]" or self.name == "[00]":
             return self.length
         else:
-            return self.length + self.parent.total_length()
+            return self.length + len(self.parent)
 
 
 def get_kj(owners, is_city):
@@ -92,11 +100,5 @@ while True:
     elif choice[0] == "add":
         grid.add_node(int(choice[2]), int(choice[3]), int(choice[1]))
 
-grid_len = 0
-for node in grid.nodes:
-    if node.is_leaf:
-        print(node.total_length())
-        if node.total_length() > grid_len:
-            grid_len = node.total_length()
 
-print(grid_len)
+print(len(grid))
