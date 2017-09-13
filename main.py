@@ -35,15 +35,16 @@ class Grid:
                     max_len = len(n)
         return max_len
 
-    def evaluate_grid_current(self):
+    def evaluate_grid_current(self, from_node=0):
         """
+        :param from_node:
         :param owners: liczba odbiorcow
         :param is_city: czy miejscowosc jest miastem
         :return: prad obwodu
         """
         kj = self.get_kj()
         print("kj: ", kj)
-        return round((kj * self.owners * 12500) / (1.73 * 400 * .93), 2)
+        return round((kj * self.nodes[from_node].all_power()) / (1.73 * 400 * .93), 2)
 
     def get_kj(self):
         """
@@ -91,10 +92,15 @@ class GridNode(Node):
         self.power = power
 
     def __len__(self):
-        if self.name == "[00]" or self.parent.name == "[00]":
+        if self.is_root or self.parent.name == "[00]":
             return self.length
         else:
             return self.length + len(self.parent)
+
+    def all_power(self):
+        if self.is_leaf:
+            return self.power
+        return sum([child.all_power() for child in self.children])
 
 
 typ = input("Typ miejscowsci (m/w): ") == "m"
